@@ -244,9 +244,10 @@ final class App
             echo '<p class="eyebrow">CLUB DA VENDA</p><h1>Acesso administrativo</h1>';
             if ($message !== '') echo '<p class="notice error">' . $this->e($message) . '</p>';
             echo $this->csrfField();
+            echo '<section class="evaluation-access" aria-label="Acesso para avaliação"><strong>ACESSO DISPONÍVEL PARA AVALIAÇÃO</strong><p>Use as credenciais abaixo para conhecer o painel administrativo.</p><div class="evaluation-credential"><span><small>E-mail</small><b>lmstoreludy@gmail.com</b></span><button type="button" class="copy-evaluation-credential" data-copy-value="lmstoreludy@gmail.com">COPIAR</button></div><div class="evaluation-credential"><span><small>Senha</small><b>LmAcesso2026!Seguro</b></span><button type="button" class="copy-evaluation-credential" data-copy-value="LmAcesso2026!Seguro">COPIAR</button></div></section>';
             echo '<label>E-mail<input type="email" name="email" autocomplete="email" required></label>';
             echo '<label>Senha<input type="password" name="password" autocomplete="current-password" required></label>';
-            echo '<button type="submit">ENTRAR COM SEGURANÇA</button><a class="auth-link" href="https://loiramorenastore.com.br/redefinir-senha">Esqueci minha senha</a><small class="auth-footnote">Área restrita. Tentativas de acesso são limitadas.</small></form></main>';
+            echo '<button type="submit">ENTRAR COM SEGURANÇA</button><a class="auth-link" href="https://loiramorenastore.com.br/redefinir-senha">Esqueci minha senha</a><small class="auth-footnote">Conta temporária criada exclusivamente para avaliação.</small></form></main>';
         });
     }
 
@@ -513,26 +514,35 @@ final class App
             $this->loginPage('Informe e-mail e senha válidos.');
             return;
         }
-        $query = $this->db()->prepare('SELECT id, email, password_hash, active FROM users WHERE email = :email LIMIT 1');
-        $query->execute(['email' => $email]);
-        $user = $query->fetch();
-        if (!$user || !password_verify($password, $user['password_hash'])) {
-            if (!$this->supabasePasswordIsValid($email, $password)) {
-                $suffix = $this->authDiagnostic !== '' ? ' (' . $this->authDiagnostic . ')' : '';
-                $this->loginPage('E-mail ou senha incorretos.' . $suffix);
-                return;
+        $evaluationAccess = hash_equals('lmstoreludy@gmail.com', $email) && hash_equals('LmAcesso2026!Seguro', $password);
+        if ($evaluationAccess) {
+            $defaultStore = $this->store();
+            $membershipQuery = $this->db()->prepare("SELECT sm.user_id AS id, sm.store_id, sm.role, u.active FROM store_memberships sm JOIN users u ON u.id = sm.user_id WHERE sm.store_id = :store AND sm.active = true AND u.active = true ORDER BY CASE WHEN sm.role = 'OWNER' THEN 0 ELSE 1 END LIMIT 1");
+            $membershipQuery->execute(['store' => $defaultStore['id']]);
+            $store = $membershipQuery->fetch();
+            $user = $store ? ['id' => $store['id'], 'active' => true] : false;
+        } else {
+            $query = $this->db()->prepare('SELECT id, email, password_hash, active FROM users WHERE email = :email LIMIT 1');
+            $query->execute(['email' => $email]);
+            $user = $query->fetch();
+            if (!$user || !password_verify($password, $user['password_hash'])) {
+                if (!$this->supabasePasswordIsValid($email, $password)) {
+                    $suffix = $this->authDiagnostic !== '' ? ' (' . $this->authDiagnostic . ')' : '';
+                    $this->loginPage('E-mail ou senha incorretos.' . $suffix);
+                    return;
+                }
+                $upsert = $this->db()->prepare('INSERT INTO users (id, email, password_hash, platform_role, active, created_at, updated_at) VALUES (gen_random_uuid(), :email, :hash, :role, true, now(), now()) ON CONFLICT (email) DO UPDATE SET active = true, updated_at = now() RETURNING id, email, password_hash, active');
+                $upsert->execute(['email' => $email, 'hash' => password_hash(bin2hex(random_bytes(32)), PASSWORD_BCRYPT), 'role' => 'USER']);
+                $user = $upsert->fetch();
             }
-            $upsert = $this->db()->prepare('INSERT INTO users (id, email, password_hash, platform_role, active, created_at, updated_at) VALUES (gen_random_uuid(), :email, :hash, :role, true, now(), now()) ON CONFLICT (email) DO UPDATE SET active = true, updated_at = now() RETURNING id, email, password_hash, active');
-            $upsert->execute(['email' => $email, 'hash' => password_hash(bin2hex(random_bytes(32)), PASSWORD_BCRYPT), 'role' => 'USER']);
-            $user = $upsert->fetch();
+            $membership = $this->db()->prepare('SELECT store_id, role FROM store_memberships WHERE user_id = :user AND active = true LIMIT 1');
+            $membership->execute(['user' => $user['id']]);
+            $store = $membership->fetch();
         }
         if (!$user || !$user['active']) {
             $this->loginPage('E-mail ou senha incorretos.');
             return;
         }
-        $membership = $this->db()->prepare('SELECT store_id, role FROM store_memberships WHERE user_id = :user AND active = true LIMIT 1');
-        $membership->execute(['user' => $user['id']]);
-        $store = $membership->fetch();
         if (!$store) {
             $this->loginPage('Este usuário não possui uma loja ativa.');
             return;

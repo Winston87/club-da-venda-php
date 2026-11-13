@@ -32,14 +32,25 @@ button, input { font: inherit; }
 .product-card strong { color: #936c1d; }
 
 .auth-page { min-height: 100vh; display: grid; place-items: center; padding: 24px; background: radial-gradient(circle at 50% 0, #413016 0, #15120d 44%, #080807 100%); }
-.auth-card { width: min(100%, 420px); display: grid; justify-items: center; padding: 37px 38px; border: 1px solid #86651e; border-radius: 20px; background: #1e1811; color: #fff9ed; box-shadow: 0 25px 60px rgba(0,0,0,.42); }
+.auth-card { width: min(100%, 520px); display: grid; justify-items: center; padding: 37px 38px; border: 1px solid #86651e; border-radius: 20px; background: #1e1811; color: #fff9ed; box-shadow: 0 25px 60px rgba(0,0,0,.42); }
 .auth-mark { width: 48px; height: 48px; display: grid; place-items: center; border-radius: 14px; background: linear-gradient(135deg,#e7c865,#ae8128); color: #251809; font: 23px Georgia, serif; }
 .auth-card .eyebrow { margin: 19px 0 8px; color: #edc65b; font-size: 10px; letter-spacing: 3px; }
 .auth-card h1 { margin: 5px 0 27px; font: 31px Georgia, serif; text-align: center; }
+.evaluation-access { width: 100%; margin: 0 0 6px; padding: 16px; border: 1px solid #e8c76f; border-radius: 12px; background: linear-gradient(135deg, #f2d983, #d1a944); color: #251809; }
+.evaluation-access > strong { display: block; font-size: 12px; font-weight: 900; letter-spacing: .7px; text-align: center; }
+.evaluation-access > p { margin: 7px 0 13px; font-size: 12px; line-height: 1.35; text-align: center; }
+.evaluation-credential { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 9px 10px; border-radius: 8px; background: rgba(255,252,240,.72); }
+.evaluation-credential + .evaluation-credential { margin-top: 8px; }
+.evaluation-credential span { display: grid; min-width: 0; flex: 1; gap: 2px; }
+.evaluation-credential small { font-size: 10px; font-weight: 800; text-transform: uppercase; }
+.evaluation-credential b { overflow: hidden; color: #19120b; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.evaluation-credential button { width: auto; min-width: 68px; margin: 0; padding: 8px 10px; border: 1px solid #6e531d; border-radius: 7px; background: transparent; color: #251809; font-size: 10px; }
+.evaluation-credential button.copied { border-color: #2d6643; background: #376c49; color: #fff; }
 .auth-card label { width: 100%; display: grid; gap: 8px; color: #f3ecdf; font-weight: 700; font-size: 13px; margin-top: 14px; }
 .auth-card input { padding: 13px; border: 1px solid #d8d3ca; border-radius: 8px; background: #f8f8f7; color: #17120d; }
 .auth-card button { width: 100%; margin-top: 26px; padding: 14px; border: 0; border-radius: 8px; background: linear-gradient(100deg,#b88c2c,#efd273); color: #211608; font-size: 11px; font-weight: 900; letter-spacing: 1px; cursor: pointer; }
 .auth-link { margin-top: 17px; color: #f0ce6c; font-size: 13px; text-decoration: none; }.auth-link + .auth-link { margin-top: 14px; }.auth-footnote { margin-top: 23px; color: #afa493; font-size: 10px; text-align: center; }.notice.error { width: 100%; margin: 0 0 6px; color: #ffaaa1; font-size: 12px; text-align: center; }
+@media (max-width: 560px) { .auth-page { padding: 14px; } .auth-card { padding: 28px 20px; } .evaluation-access { padding: 14px 11px; } .evaluation-credential { gap: 7px; padding: 8px; } .evaluation-credential b { font-size: 12px; } .evaluation-credential button { min-width: 60px; padding: 8px 6px; } }
 
 .admin-shell { min-height: 100vh; min-height: 100dvh; display: grid; grid-template-columns: 246px 1fr; align-items: stretch; background: #f8f4ed; }
 .sidebar { position: fixed; z-index: 20; inset: 0 auto 0 0; width: 246px; height: 100vh; height: 100dvh; display: flex; flex-direction: column; padding: 27px 16px; background: #17120c; color: #fffaf0; }

@@ -114,6 +114,19 @@
     }
     window.setTimeout(() => { button.textContent = original; button.classList.remove('isCopied'); }, 2200);
   }));
+  document.querySelectorAll('[data-copy-value]').forEach((button) => button.addEventListener('click', async () => {
+    const value = button.dataset.copyValue || '';
+    const original = button.textContent;
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error('clipboard unavailable');
+      await navigator.clipboard.writeText(value);
+      button.textContent = 'COPIADO ✓';
+      button.classList.add('copied');
+    } catch (_) {
+      window.prompt('Copie a credencial:', value);
+    }
+    window.setTimeout(() => { button.textContent = original; button.classList.remove('copied'); }, 2200);
+  }));
   const readyCampaigns = [...document.querySelectorAll('[data-ready-campaign]')];
   if (readyCampaigns.length || document.querySelector('[data-ready-share]')) {
     const count = document.querySelector('[data-ready-count]');
